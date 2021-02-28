@@ -48,7 +48,7 @@ namespace Api.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] StudentDto dto)
+        public IActionResult Register([FromBody] NewStudentDto dto)
         {
             var student = new Student(dto.Name, dto.Email);
 
@@ -71,7 +71,7 @@ namespace Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(long id)
+        public IActionResult Unregister(long id)
         {
             Student student = _studentRepository.GetById(id);
             if (student == null)
@@ -165,17 +165,6 @@ namespace Api.Controllers
             _unitOfWork.Commit();
 
             return Ok();
-        }
-
-        private bool HasEnrollmentChanged(string newCourseName, string newGrade, Enrollment enrollment)
-        {
-            if (string.IsNullOrWhiteSpace(newCourseName) && enrollment == null)
-                return false;
-
-            if (string.IsNullOrWhiteSpace(newCourseName) || enrollment == null)
-                return true;
-
-            return newCourseName != enrollment.Course.Name || newGrade != enrollment.Grade.ToString();
         }
     }
 }
