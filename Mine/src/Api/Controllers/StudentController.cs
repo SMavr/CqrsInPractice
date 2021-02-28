@@ -155,6 +155,8 @@ namespace Api.Controllers
         [HttpPut("{id}")]
         public IActionResult EditPersonalInfo(long id, [FromBody] StudentPersonalInfoDto dto)
         {
+            var command = new EditPersonalInfoCommand();
+
             Student student = _studentRepository.GetById(id);
             if (student == null)
                 return Error($"No student found for Id {id}");
