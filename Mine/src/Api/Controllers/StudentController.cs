@@ -131,6 +131,28 @@ namespace Api.Controllers
             return Ok();
         }
 
+        [HttpPost("{id}/enrollments/{enrollmentNumber}/deletion")]
+        public IActionResult Disenroll(long id, int enrollmentNumber, [FromBody] StudentDisenrollmentsDto dto)
+        {
+            Student student = _studentRepository.GetById(id);
+            if (student == null)
+                return Error($"No student found for Id {id}");
+
+            if (string.IsNullOrWhiteSpace(dto.Comment))
+                return Error("Disenrollment comment is required");
+
+            Enrollment enrollment = student.GetEnrollment(enrollmentNumber);
+            if (enrollment == null)
+                return Error($"No enrollment fount with number '{enrollment}'");
+
+            student.RemoveEnrollment(enrollment);
+            student.AddDisenrollmentComment(enrollment, dto.Comment);
+
+            _unitOfWork.Commit();
+
+            return Ok();
+        }
+
         [HttpPut("{id}")]
         public IActionResult Update(long id, [FromBody] StudentDto dto)
         {
