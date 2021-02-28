@@ -1,25 +1,47 @@
-﻿namespace Logic.Students
+﻿using CSharpFunctionalExtensions;
+using Logic.Utils;
+
+namespace Logic.Students
 {
-    public class EditPersonalInfoCommand
+    public interface ICommand
+    {
+    }
+
+    public interface ICommandHandler<TCommand>
+       where TCommand : ICommand
+    {
+        Result Handle(TCommand command);
+    }
+
+    public class EditPersonalInfoCommand : ICommand
     {
         public long Id { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
     }
 
-    public sealed class EditPersonalInfoCommandHandler
+    public sealed class EditPersonalInfoCommandHandler : ICommandHandler<EditPersonalInfoCommand>
     {
-        public void Handle(EditPersonalInfoCommand command)
+        private readonly UnitOfWork unitOfWork;
+
+        public EditPersonalInfoCommandHandler(UnitOfWork unitOfWork)
         {
+            this.unitOfWork = unitOfWork;
+        }
 
-            //Student student = _studentRepository.GetById(id);
-            //if (student == null)
-            //    return Error($"No student found for Id {id}");
+        public Result Handle(EditPersonalInfoCommand command)
+        {
+            var repository = new StudentRepository(unitOfWork);
+            Student student = repository.GetById(command.Id);
+            if (student == null)
+                return Result.Fail($"No student found for Id {command.Id}");
 
-            //student.Name = dto.Name;
-            //student.Email = dto.Email;
+            student.Name = command.Name;
+            student.Email = command.Email;
 
-            //_unitOfWork.Commit();
+            unitOfWork.Commit();
+
+            return Result.Ok();
         }
     }
 }

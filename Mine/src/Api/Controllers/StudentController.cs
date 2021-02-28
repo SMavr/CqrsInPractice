@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Api.Dtos;
+using CSharpFunctionalExtensions;
 using Logic.Students;
 using Logic.Utils;
 using Microsoft.AspNetCore.Mvc;
@@ -161,10 +162,10 @@ namespace Api.Controllers
                 Name = dto.Name,
                 Id = id
             };
-            var handler = new EditPersonalInfoCommandHandler();
-            handler.Handle(command);
+            var handler = new EditPersonalInfoCommandHandler(_unitOfWork);
+            Result result = handler.Handle(command);
 
-            return Ok();
+            return result.IsSuccess ? Ok() : Error(result.Error);
         }
     }
 }
