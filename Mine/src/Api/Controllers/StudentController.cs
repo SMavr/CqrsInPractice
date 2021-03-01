@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Api.Dtos;
 using CSharpFunctionalExtensions;
+using Logic.Dtos;
 using Logic.Students;
 using Logic.Utils;
 using Microsoft.AspNetCore.Mvc;
