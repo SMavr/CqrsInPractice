@@ -1,7 +1,8 @@
 ﻿using CSharpFunctionalExtensions;
+using Logic.Students;
 using System;
 
-namespace Logic.Students
+namespace Logic.Utils
 {
     public class Messages
     {

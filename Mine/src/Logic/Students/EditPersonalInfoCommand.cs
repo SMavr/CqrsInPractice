@@ -1,5 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
+using Logic.Dtos;
 using Logic.Utils;
+using System.Collections.Generic;
 
 namespace Logic.Students
 {
@@ -23,11 +25,30 @@ namespace Logic.Students
         TResult Handle(TQuery query); 
     }
 
+    public sealed class GetListQuery : IQuery<List<StudentDto>>
+    {
+        public string EnrolledIn { get; }
+        public int? NumberOfCourses { get; }
+
+        public GetListQuery(string enrolledIn, int? numberOfCourses)
+        {
+            EnrolledIn = enrolledIn;
+            NumberOfCourses = numberOfCourses;
+        }
+    }
+
     public class EditPersonalInfoCommand : ICommand
     {
-        public long Id { get; set; }
-        public string Name { get; set; }
-        public string Email { get; set; }
+        public long Id { get; }
+        public string Name { get; }
+        public string Email { get; }
+
+        public EditPersonalInfoCommand(long id, string name, string email)
+        {
+            Id = id;
+            Name = name;
+            Email = email;
+        }
     }
 
     public sealed class EditPersonalInfoCommandHandler : ICommandHandler<EditPersonalInfoCommand>
