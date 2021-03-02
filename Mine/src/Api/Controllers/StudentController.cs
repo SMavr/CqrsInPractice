@@ -64,14 +64,8 @@ namespace Api.Controllers
         [HttpDelete("{id}")]
         public IActionResult Unregister(long id)
         {
-            Student student = _studentRepository.GetById(id);
-            if (student == null)
-                return Error($"No student found for Id {id}");
-
-            _studentRepository.Delete(student);
-            _unitOfWork.Commit();
-
-            return Ok();
+            Result result = messages.Dispatch(new UnregisterCommand(id));
+            return result.IsFailure ? Ok() : Error(result.Error);
         }
 
         [HttpPost("{id}/enrollments")]
