@@ -12,17 +12,11 @@ namespace Api.Controllers
     [Route("api/students")]
     public sealed class StudentController : BaseController
     {
-        private readonly UnitOfWork _unitOfWork;
         private readonly Messages messages;
-        private readonly StudentRepository _studentRepository;
-        private readonly CourseRepository _courseRepository;
 
         public StudentController(UnitOfWork unitOfWork, Messages messages)
         {
-            _unitOfWork = unitOfWork;
             this.messages = messages;
-            _studentRepository = new StudentRepository(unitOfWork);
-            _courseRepository = new CourseRepository(unitOfWork);
         }
 
         [HttpGet]
@@ -31,22 +25,6 @@ namespace Api.Controllers
             List<StudentDto> list = messages
                 .Dispatch(new GetListQuery(enrolled, number));
             return Ok(list);
-        }
-
-        private StudentDto ConvertToDto(Student student)
-        {
-            return new StudentDto
-            {
-                Id = student.Id,
-                Name = student.Name,
-                Email = student.Email,
-                Course1 = student.FirstEnrollment?.Course?.Name,
-                Course1Grade = student.FirstEnrollment?.Grade.ToString(),
-                Course1Credits = student.FirstEnrollment?.Course?.Credits,
-                Course2 = student.SecondEnrollment?.Course?.Name,
-                Course2Grade = student.SecondEnrollment?.Grade.ToString(),
-                Course2Credits = student.SecondEnrollment?.Course?.Credits,
-            };
         }
 
         [HttpPost]
@@ -71,7 +49,6 @@ namespace Api.Controllers
         [HttpPost("{id}/enrollments")]
         public IActionResult Enroll(long id, [FromBody] StudentEnrollmentDto dto)
         {
-
             Result result = messages.Dispatch(new EnrollCommand(id, dto.Course, dto.Grade));
             return result.IsSuccess ? Ok() : Error(result.Error);
         }
@@ -86,22 +63,8 @@ namespace Api.Controllers
         [HttpPost("{id}/enrollments/{enrollmentNumber}/deletion")]
         public IActionResult Disenroll(long id, int enrollmentNumber, [FromBody] StudentDisenrollmentsDto dto)
         {
-            Student student = _studentRepository.GetById(id);
-            if (student == null)
-                return Error($"No student found for Id {id}");
-
-            if (string.IsNullOrWhiteSpace(dto.Comment))
-                return Error("Disenrollment comment is required");
-
-            Enrollment enrollment = student.GetEnrollment(enrollmentNumber);
-            if (enrollment == null)
-                return Error($"No enrollment fount with number '{enrollment}'");
-
-            student.RemoveEnrollment(enrollment, dto.Comment);
-
-            _unitOfWork.Commit();
-
-            return Ok();
+            Result result = messages.Dispatch(new DisenrollCommand(id, enrollmentNumber, dto.Comment));
+            return result.IsSuccess ? Ok() : Error(result.Error);
         }
 
         [HttpPut("{id}")]
@@ -109,7 +72,6 @@ namespace Api.Controllers
         {
             var command = new EditPersonalInfoCommand(id, dto.Email, dto.Name);
             Result result = messages.Dispatch(command);
-
             return result.IsSuccess ? Ok() : Error(result.Error);
         }
     }
