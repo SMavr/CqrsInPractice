@@ -28,10 +28,9 @@ namespace Api.Controllers
         [HttpGet]
         public IActionResult GetList(string enrolled, int? number)
         {
-            IReadOnlyList<Student> students = _studentRepository.GetList(enrolled, number);
-            List<StudentDto> dtos = students.Select(x => ConvertToDto(x)).ToList();
-            _unitOfWork.Commit();
-            return Ok(dtos);
+            List<StudentDto> list = messages
+                .Dispatch(new GetListQuery(enrolled, number));
+            return Ok(list);
         }
 
         private StudentDto ConvertToDto(Student student)
@@ -158,12 +157,7 @@ namespace Api.Controllers
         [HttpPut("{id}")]
         public IActionResult EditPersonalInfo(long id, [FromBody] StudentPersonalInfoDto dto)
         {
-            var command = new EditPersonalInfoCommand
-            {
-                Email = dto.Email,
-                Name = dto.Name,
-                Id = id
-            };
+            var command = new EditPersonalInfoCommand(id, dto.Email, dto.Name);
             Result result = messages.Dispatch(command);
 
             return result.IsSuccess ? Ok() : Error(result.Error);
