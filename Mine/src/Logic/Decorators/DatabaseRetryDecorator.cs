@@ -21,7 +21,7 @@ namespace Logic.Decorators
 
         public Result Handle(TCommand command)
         {
-            for (int i = 0; i < config.NumberOfDatabaseRetries; i++)
+            for (int i = 0; ; i++)
             {
                 try
                 {
@@ -34,8 +34,6 @@ namespace Logic.Decorators
                         throw;
                 }
             }
-
-            throw new InvalidOperationException("Should not ever get here");
         }
 
         private bool IsDatabaseException(Exception exception)
