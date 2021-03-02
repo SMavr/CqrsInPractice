@@ -29,7 +29,7 @@ namespace Api
             services.AddSingleton(new SessionFactory(Configuration["ConnectionString"]));
             services.AddTransient<UnitOfWork>();
             services.AddTransient<ICommandHandler<EditPersonalInfoCommand>>(provider =>
-            new DatabaseRetryDecorator<EditPersonalInfoCommand>(new EditPersonalInfoCommandHandler(provider.GetService<UnitOfWork>()),
+            new DatabaseRetryDecorator<EditPersonalInfoCommand>(new EditPersonalInfoCommandHandler(provider.GetService<SessionFactory>()),
             provider.GetService<Config>()));
             services.AddTransient<ICommandHandler<RegisterCommand>, RegisterCommandHandler>();
             services.AddTransient<ICommandHandler<UnregisterCommand>, UnregisterCommandHandler>();

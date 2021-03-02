@@ -89,15 +89,16 @@ namespace Logic.Students
 
     public sealed class EditPersonalInfoCommandHandler : ICommandHandler<EditPersonalInfoCommand>
     {
-        private readonly UnitOfWork unitOfWork;
+        private readonly SessionFactory sessionFactory;
 
-        public EditPersonalInfoCommandHandler(UnitOfWork unitOfWork)
+        public EditPersonalInfoCommandHandler(SessionFactory sessionFactory)
         {
-            this.unitOfWork = unitOfWork;
+            this.sessionFactory = sessionFactory;
         }
 
         public Result Handle(EditPersonalInfoCommand command)
         {
+            var unitOfWork = new UnitOfWork(sessionFactory);
             var repository = new StudentRepository(unitOfWork);
             Student student = repository.GetById(command.Id);
             if (student == null)
