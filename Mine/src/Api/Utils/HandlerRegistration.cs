@@ -71,6 +71,33 @@ namespace Api.Utils
             return func;
         }
 
+        private static object[] GetParameters(List<ParameterInfo> parameterInfos, object current, IServiceProvider provider)
+        {
+            var result = new object[parameterInfos.Count];
+
+            for (int i = 0; i < parameterInfos.Count; i++)
+            {
+                result[i] = GetParameter(parameterInfos[i], current, provider);
+            }
+
+            return result;
+        }
+
+        private static object GetParameter(ParameterInfo parameterInfo, object current, IServiceProvider provider)
+        {
+            Type parameterType = parameterInfo.ParameterType;
+
+            if (IsHandlerInterface(parameterType))
+                return current;
+
+            object service = provider.GetService(parameterType);
+            if (service != null)
+                return service;
+
+            throw new ArgumentException($"Type {parameterType} not found");
+        }
+
+
         private static Type ToDecorator(object attribute)
         {
             Type type = attribute.GetType();
