@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using CSharpFunctionalExtensions;
 using Logic.Dtos;
 using Logic.Students;
@@ -14,7 +12,7 @@ namespace Api.Controllers
     {
         private readonly Messages messages;
 
-        public StudentController(UnitOfWork unitOfWork, Messages messages)
+        public StudentController(Messages messages)
         {
             this.messages = messages;
         }
