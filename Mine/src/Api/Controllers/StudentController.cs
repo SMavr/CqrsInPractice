@@ -65,7 +65,7 @@ namespace Api.Controllers
         public IActionResult Unregister(long id)
         {
             Result result = messages.Dispatch(new UnregisterCommand(id));
-            return result.IsFailure ? Ok() : Error(result.Error);
+            return result.IsSuccess ? Ok() : Error(result.Error);
         }
 
         [HttpPost("{id}/enrollments")]
@@ -73,33 +73,14 @@ namespace Api.Controllers
         {
 
             Result result = messages.Dispatch(new EnrollCommand(id, dto.Course, dto.Grade));
-            return result.IsFailure ? Ok() : Error(result.Error);
+            return result.IsSuccess ? Ok() : Error(result.Error);
         }
 
         [HttpPut("{id}/enrollments/{enrollmentNumber}")]
         public IActionResult Transfer(long id, int enrollmentNumber, [FromBody] StudentTransferDto dto)
         {
-            Student student = _studentRepository.GetById(id);
-            if (student == null)
-                return Error($"No student found for Id {id}");
-
-            Course course = _courseRepository.GetByName(dto.Course);
-            if (course == null)
-                return Error($"Course is incorrect: {dto.Course}");
-
-            bool success = Enum.TryParse(dto.Grade, out Grade grade);
-            if (!success)
-                return Error($"Grade is incorrect: {dto.Grade}");
-
-            Enrollment enrollment = student.GetEnrollment(enrollmentNumber);
-            if (enrollment == null)
-                return Error($"No enrollment fount with number '{enrollment}'");
-
-            enrollment.Update(course, grade);
-
-            _unitOfWork.Commit();
-
-            return Ok();
+            Result result = messages.Dispatch(new TransferCommand(id, enrollmentNumber, dto.Course, dto.Grade));
+            return result.IsSuccess ? Ok() : Error(result.Error);
         }
 
         [HttpPost("{id}/enrollments/{enrollmentNumber}/deletion")]
