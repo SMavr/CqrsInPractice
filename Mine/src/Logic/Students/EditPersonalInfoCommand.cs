@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using Logic.Decorators;
 using Logic.Dtos;
 using Logic.Utils;
 using System;
@@ -87,6 +88,8 @@ namespace Logic.Students
         }
     }
 
+    [DatabaseRetry]
+    [AuditLog]
     public sealed class EditPersonalInfoCommandHandler : ICommandHandler<EditPersonalInfoCommand>
     {
         private readonly SessionFactory sessionFactory;
