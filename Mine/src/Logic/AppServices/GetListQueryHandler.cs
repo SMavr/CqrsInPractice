@@ -1,27 +1,49 @@
 ﻿using CSharpFunctionalExtensions;
+using Dapper;
 using Logic.Dtos;
 using Logic.Students;
 using Logic.Utils;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 
 namespace Logic.AppServices
 {
     public sealed class GetListQueryHandler : IQueryHandler<GetListQuery, List<StudentDto>>
     {
-        private readonly UnitOfWork unitOfWork;
+        private readonly ConnectionString connectionString;
 
-        public GetListQueryHandler(UnitOfWork unitOfWork)
+        public GetListQueryHandler(ConnectionString connectionString)
         {
-            this.unitOfWork = unitOfWork;
+            this.connectionString = connectionString;
         }
 
         public List<StudentDto> Handle(GetListQuery query)
         {
-            return new StudentRepository(unitOfWork)
-                .GetList(query.EnrolledIn, query.NumberOfCourses)
-                .Select(x => ConvertToDto(x))
-                .ToList();
+            string sql = @"
+                    SELECT s.StudentID Id, s.Name, s.Email,
+	                    s.FirstCourseName Course1, s.FirstCourseCredits Course1Credits, s.FirstCourseGrade Course1Grade,
+	                    s.SecondCourseName Course2, s.SecondCourseCredits Course2Credits, s.SecondCourseGrade Course2Grade
+                    FROM dbo.Student s
+                    WHERE (s.FirstCourseName = @Course
+		                    OR s.SecondCourseName = @Course
+		                    OR @Course IS NULL)
+                        AND (s.NumberOfEnrollments = @Number
+                            OR @Number IS NULL)
+                    ORDER BY s.StudentID ASC";
+
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString.Value))
+            {
+                List<StudentInDb> students = sqlConnection
+                    .Query<StudentInDb>(sql, new
+                    {
+                        Course = query.EnrolledIn,
+                        Number = query.NumberOfCourses
+                    })
+                    .ToList();
+
+                return null;
+            }
         }
 
         private StudentDto ConvertToDto(Student student)
@@ -39,6 +61,27 @@ namespace Logic.AppServices
                 Course2Credits = student.SecondEnrollment?.Course?.Credits,
             };
         }
+    }
+
+    public class StudentInDb
+    {
+        public StudentInDb(long studentId, string name, string email,
+            Grade? grade, string courseName, int? credits)
+        {
+            StudentId = studentId;
+            Name = name;
+            Email = email;
+            Grade = grade;
+            CourseName = courseName;
+            Credits = credits;
+        }
+
+        public long StudentId { get; }
+        public string Name { get; }
+        public string Email { get; }
+        public Grade? Grade { get; }
+        public string CourseName { get; }
+        public int? Credits { get; }
     }
 
 }
