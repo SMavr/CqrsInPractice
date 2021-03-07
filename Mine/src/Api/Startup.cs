@@ -26,7 +26,7 @@ namespace Api
             var config = new Config(3); // Real world application should initialized from appsetting.json
             services.AddSingleton(config);
 
-            var connectionString = new ConnectionString(Configuration["ConnectionString"]);
+            var connectionString = new CommandConnectionString(Configuration["ConnectionString"]);
             services.AddSingleton(connectionString);
 
             services.AddSingleton<SessionFactory>();

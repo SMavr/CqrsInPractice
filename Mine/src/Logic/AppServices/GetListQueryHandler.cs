@@ -11,9 +11,9 @@ namespace Logic.AppServices
 {
     public sealed class GetListQueryHandler : IQueryHandler<GetListQuery, List<StudentDto>>
     {
-        private readonly ConnectionString connectionString;
+        private readonly CommandConnectionString connectionString;
 
-        public GetListQueryHandler(ConnectionString connectionString)
+        public GetListQueryHandler(CommandConnectionString connectionString)
         {
             this.connectionString = connectionString;
         }
