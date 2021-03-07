@@ -1,5 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
-using Logic.Students;
+using Logic.AppServices;
 using Logic.Utils;
 using System;
 using System.Collections.Generic;

@@ -1,78 +1,10 @@
 ﻿using CSharpFunctionalExtensions;
-using Logic.Decorators;
-using Logic.Dtos;
+using Logic.Students;
 using Logic.Utils;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace Logic.Students
+namespace Logic.AppServices
 {
-    public interface ICommand
-    {
-    }
-
-    public interface IQuery<TResult>
-    {
-    }
-
-    public interface ICommandHandler<TCommand>
-       where TCommand : ICommand
-    {
-        Result Handle(TCommand command);
-    }
-
-    public interface IQueryHandler<TQuery, TResult>
-        where TQuery : IQuery<TResult>
-    {
-        TResult Handle(TQuery query); 
-    }
-
-    public sealed class GetListQuery : IQuery<List<StudentDto>>
-    {
-        public string EnrolledIn { get; }
-        public int? NumberOfCourses { get; }
-
-        public GetListQuery(string enrolledIn, int? numberOfCourses)
-        {
-            EnrolledIn = enrolledIn;
-            NumberOfCourses = numberOfCourses;
-        }
-    }
-
-    public sealed class GetListQueryHandler : IQueryHandler<GetListQuery, List<StudentDto>>
-    {
-        private readonly UnitOfWork unitOfWork;
-
-        public GetListQueryHandler(UnitOfWork unitOfWork)
-        {
-            this.unitOfWork = unitOfWork;
-        }
-
-        public List<StudentDto> Handle(GetListQuery query)
-        {
-            return new StudentRepository(unitOfWork)
-                .GetList(query.EnrolledIn, query.NumberOfCourses)
-                .Select(x => ConvertToDto(x))
-                .ToList();
-        }
-
-        private StudentDto ConvertToDto(Student student)
-        {
-            return new StudentDto
-            {
-                Id = student.Id,
-                Name = student.Name,
-                Email = student.Email,
-                Course1 = student.FirstEnrollment?.Course?.Name,
-                Course1Grade = student.FirstEnrollment?.Grade.ToString(),
-                Course1Credits = student.FirstEnrollment?.Course?.Credits,
-                Course2 = student.SecondEnrollment?.Course?.Name,
-                Course2Grade = student.SecondEnrollment?.Grade.ToString(),
-                Course2Credits = student.SecondEnrollment?.Course?.Credits,
-            };
-        }
-    }
 
     public class EditPersonalInfoCommand : ICommand
     {
@@ -85,56 +17,6 @@ namespace Logic.Students
             Id = id;
             Name = name;
             Email = email;
-        }
-    }
-
-    [DatabaseRetry]
-    [AuditLog]
-    public sealed class EditPersonalInfoCommandHandler : ICommandHandler<EditPersonalInfoCommand>
-    {
-        private readonly SessionFactory sessionFactory;
-
-        public EditPersonalInfoCommandHandler(SessionFactory sessionFactory)
-        {
-            this.sessionFactory = sessionFactory;
-        }
-
-        public Result Handle(EditPersonalInfoCommand command)
-        {
-            var unitOfWork = new UnitOfWork(sessionFactory);
-            var repository = new StudentRepository(unitOfWork);
-            Student student = repository.GetById(command.Id);
-            if (student == null)
-                return Result.Fail($"No student found for Id {command.Id}");
-
-            student.Name = command.Name;
-            student.Email = command.Email;
-
-            unitOfWork.Commit();
-
-            return Result.Ok();
-        }   
-    }
-
-    public sealed class RegisterCommand : ICommand
-    {
-        public string Name { get; }
-        public string Email { get; }
-
-        public string Course1 { get; }
-        public string Course1Grade { get; }
-
-        public string Course2 { get; }
-        public string Course2Grade { get; }
-
-        public RegisterCommand(string name, string email, string course1, string course1Grade, string course2, string course2Grade)
-        {
-            Name = name;
-            Email = email;
-            Course1 = course1;
-            Course1Grade = course1Grade;
-            Course2 = course2;
-            Course2Grade = course2Grade;
         }
     }
 

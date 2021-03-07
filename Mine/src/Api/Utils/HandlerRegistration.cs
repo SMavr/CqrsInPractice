@@ -1,5 +1,5 @@
-﻿using Logic.Decorators;
-using Logic.Students;
+﻿using Logic.AppServices;
+using Logic.Decorators;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
