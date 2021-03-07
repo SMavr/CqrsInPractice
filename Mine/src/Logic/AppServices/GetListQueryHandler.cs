@@ -42,7 +42,40 @@ namespace Logic.AppServices
                     })
                     .ToList();
 
-                return null;
+                List<long> ids = students
+                    .GroupBy(x => x.StudentId)
+                    .Select(x => x.Key)
+                    .ToList();
+
+                var result = new List<StudentDto>();
+
+                foreach (var id in ids)
+                {
+                    List<StudentInDb> data = students
+                        .Where(x => x.StudentId == id)
+                        .ToList();
+
+                    var dto = new StudentDto
+                    {
+                        Id = data[0].StudentId,
+                        Name = data[0].Name,
+                        Email = data[0].Email,
+                        Course1 = data[0].CourseName,
+                        Course1Credits = data[0].Credits,
+                        Course1Grade = data[0]?.Grade.ToString()
+                    };
+
+                    if (data.Count > 1)
+                    {
+                        dto.Course2 = data[1].CourseName;
+                        dto.Course2Credits = data[1].Credits;
+                        dto.Course2Grade = data[1]?.Grade.ToString();
+                    }
+
+                    result.Add(dto);
+                }
+
+                return result;
             }
         }
     }
